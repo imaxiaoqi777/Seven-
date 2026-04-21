@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import * as XLSX from "xlsx"
 
 import { auth } from "@/lib/auth-config"
+import {
+  LOAD_EXPORT_COLUMN_OPTIONS,
+  normalizeLoadExportColumnKeys,
+  type LoadExportColumnKey,
+} from "@/lib/loads/export-columns"
 import { getLoadExportList } from "@/lib/loads/queries"
 import {
   formatLoadDateTimeLabel,
@@ -9,12 +14,52 @@ import {
   resolveLoadListFilters,
 } from "@/lib/loads/utils"
 import { hasPermission } from "@/lib/permissions"
+import { getUserRoleLabel } from "@/lib/users/utils"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+type LoadExportItem = Awaited<ReturnType<typeof getLoadExportList>>[number]
+
 function formatDateTime(value: Date) {
   return value.toLocaleString("zh-CN")
+}
+
+function formatDate(value?: Date | null) {
+  return value ? value.toLocaleDateString("zh-CN") : ""
+}
+
+const columnValueGetters: Record<LoadExportColumnKey, (item: LoadExportItem) => string | number> = {
+  loadNumber: (item) => item.loadNumber,
+  status: (item) => getLoadStatusLabel(item.status),
+  pickupAt: (item) => formatLoadDateTimeLabel(item.pickupAt),
+  destination: (item) => item.destination,
+  companyName: (item) => item.company?.name ?? "",
+  companySocialCreditCode: (item) => item.company?.socialCreditCode ?? "",
+  companyContactName: (item) => item.company?.contactName ?? "",
+  companyContactPhone: (item) => item.company?.contactPhone ?? "",
+  blNumber: (item) => item.blNumber,
+  vesselVoyage: (item) => item.vesselVoyage ?? "",
+  containerTypeName: (item) => item.containerType.name,
+  containerNumber: (item) => item.containerNumber,
+  sealNumber: (item) => item.sealNumber ?? "",
+  dropLocationName: (item) => item.dropLocation.name,
+  dropLocationAddress: (item) => item.dropLocation.fullAddress,
+  vehiclePlate: (item) => item.vehicle.plateNumber,
+  vehicleInsuranceExpiresAt: (item) => formatDate(item.vehicle.insuranceExpiresAt),
+  driverName: (item) => item.driver.name,
+  driverPhone: (item) => item.driver.phone,
+  operatorUsername: (item) => item.operatorUser.username,
+  operatorRole: (item) => getUserRoleLabel(item.operatorUser.role),
+  totalFee: (item) => Number(item.totalFee),
+  gasFee: (item) => Number(item.gasFee),
+  driverPay: (item) => Number(item.driverPay),
+  otherFee: (item) => Number(item.otherFee),
+  otherFeeRemark: (item) => item.otherFeeRemark ?? "",
+  balanceFee: (item) => Number(item.balanceFee),
+  remark: (item) => item.remark ?? "",
+  createdAt: (item) => formatDateTime(item.createdAt),
+  updatedAt: (item) => formatDateTime(item.updatedAt),
 }
 
 function buildFileName() {
@@ -64,98 +109,21 @@ export async function GET(request: NextRequest) {
     currentUserId: session.user.id,
     currentUserRole: session.user.role,
   })
-
-  const rows = items.map((item) => ({
-    提箱时间: formatLoadDateTimeLabel(item.pickupAt),
-    运单号: item.loadNumber,
-    公司名称: item.company?.name ?? "",
-    统一社会信用代码: item.company?.socialCreditCode ?? "",
-    联系人: item.company?.contactName ?? "",
-    联系电话: item.company?.contactPhone ?? "",
-    目的地: item.destination,
-    提单号: item.blNumber,
-    船名航次: item.vesselVoyage ?? "",
-    箱型: item.containerType.name,
-    箱号: item.containerNumber,
-    封号: item.sealNumber ?? "",
-    落箱地点: item.dropLocation.name,
-    落箱地址: item.dropLocation.fullAddress,
-    车牌号: item.vehicle.plateNumber,
-    司机: item.driver.name,
-    司机电话: item.driver.phone,
-    操作人员: item.operatorUser.username,
-    状态: getLoadStatusLabel(item.status),
-    总费用: Number(item.totalFee),
-    燃气费: Number(item.gasFee),
-    司机工资: Number(item.driverPay),
-    其他费用: Number(item.otherFee),
-    其他费用说明: item.otherFeeRemark ?? "",
-    结余: Number(item.balanceFee),
-    创建时间: formatDateTime(item.createdAt),
-    更新时间: formatDateTime(item.updatedAt),
-  }))
-
-  const worksheet = XLSX.utils.json_to_sheet(rows, {
-    header: [
-      "提箱时间",
-      "运单号",
-      "公司名称",
-      "统一社会信用代码",
-      "联系人",
-      "联系电话",
-      "目的地",
-      "提单号",
-      "船名航次",
-      "箱型",
-      "箱号",
-      "封号",
-      "落箱地点",
-      "落箱地址",
-      "车牌号",
-      "司机",
-      "司机电话",
-      "操作人员",
-      "状态",
-      "总费用",
-      "燃气费",
-      "司机工资",
-      "其他费用",
-      "其他费用说明",
-      "结余",
-      "创建时间",
-      "更新时间",
-    ],
+  const selectedColumnKeys = normalizeLoadExportColumnKeys(
+    request.nextUrl.searchParams.getAll("columns")
+  )
+  const selectedColumns = selectedColumnKeys.map((key) => {
+    return LOAD_EXPORT_COLUMN_OPTIONS.find((column) => column.key === key)!
   })
 
-  worksheet["!cols"] = [
-    { wch: 20 },
-    { wch: 18 },
-    { wch: 24 },
-    { wch: 24 },
-    { wch: 14 },
-    { wch: 16 },
-    { wch: 28 },
-    { wch: 20 },
-    { wch: 20 },
-    { wch: 12 },
-    { wch: 16 },
-    { wch: 16 },
-    { wch: 18 },
-    { wch: 36 },
-    { wch: 16 },
-    { wch: 14 },
-    { wch: 16 },
-    { wch: 16 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 24 },
-    { wch: 12 },
-    { wch: 20 },
-    { wch: 20 },
-  ]
+  const worksheet = XLSX.utils.aoa_to_sheet([
+    selectedColumns.map((column) => column.label),
+    ...items.map((item) =>
+      selectedColumns.map((column) => columnValueGetters[column.key](item))
+    ),
+  ])
+
+  worksheet["!cols"] = selectedColumns.map((column) => ({ wch: column.width }))
 
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, "运单列表")

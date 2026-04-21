@@ -73,20 +73,22 @@ model ContainerType {
 }
 
 model VehiclePlate {
-  id             String       @id @default(cuid())
-  plateNumber    String       @unique @db.VarChar(20)
-  vehicleType    String?      @db.VarChar(50)
-  teamName       String?      @db.VarChar(50)
-  status         RecordStatus @default(ENABLED)
-  remark         String?      @db.Text
-  createdBy      String
-  user           User         @relation(fields: [createdBy], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  defaultDrivers Driver[]     @relation("DefaultVehicle")
-  loads          Load[]
+  id                 String       @id @default(cuid())
+  plateNumber        String       @unique @db.VarChar(20)
+  vehicleType        String?      @db.VarChar(50)
+  teamName           String?      @db.VarChar(50)
+  insuranceExpiresAt DateTime?    @db.Date
+  status             RecordStatus @default(ENABLED)
+  remark             String?      @db.Text
+  createdBy          String
+  user               User         @relation(fields: [createdBy], references: [id])
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  defaultDrivers     Driver[]     @relation("DefaultVehicle")
+  loads              Load[]
 
   @@index([plateNumber])
+  @@index([insuranceExpiresAt])
   @@index([status])
   @@index([createdBy])
 }

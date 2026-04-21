@@ -62,6 +62,7 @@ const loadListInclude = {
     select: {
       id: true,
       plateNumber: true,
+      insuranceExpiresAt: true,
     },
   },
   driver: {

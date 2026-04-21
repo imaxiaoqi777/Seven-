@@ -78,9 +78,17 @@ export const loadSchema = z
       .max(100, "目的地详细地址不能超过 100 个字符。"),
     companyId: requiredSelectField("公司"),
     containerTypeId: requiredSelectField("箱型"),
-    blNumber: z.string().trim().min(1, "请输入提单号。").max(100, "提单号不能超过 100 个字符。"),
+    blNumber: z
+      .string()
+      .trim()
+      .min(1, "请输入卸货箱号。")
+      .max(100, "卸货箱号不能超过 100 个字符。"),
     vesselVoyage: optionalShortText,
-    containerNumber: z.string().trim().min(1, "请输入箱号。").max(50, "箱号不能超过 50 个字符。"),
+    containerNumber: z
+      .string()
+      .trim()
+      .min(1, "请输入装货箱号。")
+      .max(50, "装货箱号不能超过 50 个字符。"),
     sealNumber: optionalContainerText,
     dropLocationId: requiredSelectField("落箱地点"),
     vehicleId: requiredSelectField("车牌号"),

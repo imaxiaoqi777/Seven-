@@ -10,7 +10,7 @@ export default async function NewLoadPage() {
   return (
     <PageShell
       title="新建运单"
-      description="录入所属公司、目的地、箱型、提单号、箱号、落箱地点、车牌号和费用明细，并按司机绑定关系自动确定司机名称与操作人员。"
+      description="录入所属公司、目的地、箱型、卸货箱号、装货箱号、装货地址、落箱地点、车牌号和费用明细，并按司机绑定关系自动确定司机名称与操作人员。"
     >
       <LoadForm
         backHref="/dashboard/loads"

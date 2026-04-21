@@ -317,33 +317,33 @@ export function LoadForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">提单号</label>
+              <label className="block text-sm font-medium text-gray-700">卸货箱号</label>
               <input
                 name="blNumber"
                 defaultValue={initialData?.blNumber ?? ""}
-                placeholder="请输入提单号"
+                placeholder="请输入卸货箱号"
                 className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               <FieldError error={state.errors?.blNumber?.[0]} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">船名航次</label>
+              <label className="block text-sm font-medium text-gray-700">装货地址</label>
               <input
                 name="vesselVoyage"
                 defaultValue={initialData?.vesselVoyage ?? ""}
-                placeholder="选填，例如：EVERGREEN / 123E"
+                placeholder="选填，请输入装货地址"
                 className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               <FieldError error={state.errors?.vesselVoyage?.[0]} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">箱号</label>
+              <label className="block text-sm font-medium text-gray-700">装货箱号</label>
               <input
                 name="containerNumber"
                 defaultValue={initialData?.containerNumber ?? ""}
-                placeholder="请输入箱号"
+                placeholder="请输入装货箱号"
                 className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               <FieldError error={state.errors?.containerNumber?.[0]} />

@@ -21,6 +21,7 @@
 /build
 /dist-desktop
 /dist-web
+/dist-web-2
 /dist-web-release
 
 # misc

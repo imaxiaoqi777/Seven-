@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "dist-web", "dist-web-release", "dist-desktop"]
+  "exclude": ["node_modules", "dist-web", "dist-web-2", "dist-web-release", "dist-desktop"]
 }

@@ -1,7 +1,6 @@
 ﻿"use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signIn } from "next-auth/react"
@@ -10,7 +9,6 @@ import { AlertCircle } from "lucide-react"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 
 export function LoginForm() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -36,6 +34,7 @@ export function LoginForm() {
         account: data.account,
         password: data.password,
         redirect: false,
+        callbackUrl: "/dashboard",
       })
 
       if (result?.error) {
@@ -44,9 +43,11 @@ export function LoginForm() {
       }
 
       if (result?.ok) {
-        router.push("/dashboard")
-        router.refresh()
+        window.location.assign(result.url ?? "/dashboard")
+        return
       }
+
+      setErrorMessage("登录失败，请检查账号和密码后重试。")
     } catch (error) {
       setErrorMessage("暂时无法登录，请稍后再试。")
       console.error("登录错误:", error)

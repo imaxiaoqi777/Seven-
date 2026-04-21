@@ -4,6 +4,35 @@ import { z } from "zod"
 import { PHONE_REGEX } from "@/lib/utils"
 
 const SOCIAL_CREDIT_CODE_REGEX = /^[0-9A-Z]{18}$/
+const DATE_INPUT_REGEX = /^\d{4}-\d{2}-\d{2}$/
+
+function isValidDateInput(value: string) {
+  if (!value) {
+    return true
+  }
+
+  if (!DATE_INPUT_REGEX.test(value)) {
+    return false
+  }
+
+  const [year, month, day] = value.split("-").map(Number)
+  const date = new Date(year, month - 1, day)
+
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  )
+}
+
+function dateInputToDate(value: string) {
+  if (!value) {
+    return null
+  }
+
+  const [year, month, day] = value.split("-").map(Number)
+  return new Date(year, month - 1, day)
+}
 
 const statusField = z.nativeEnum(RecordStatus, {
   error: "请选择状态。",
@@ -20,6 +49,12 @@ const optionalLongText = z
   .trim()
   .max(500, "备注不能超过 500 个字符。")
   .optional()
+
+const optionalDateInput = z
+  .string()
+  .trim()
+  .refine(isValidDateInput, "请选择有效的日期。")
+  .transform(dateInputToDate)
 
 export const containerTypeSchema = z.object({
   name: z.string().trim().min(1, "请输入箱型名称。").max(50, "箱型名称不能超过 50 个字符。"),
@@ -52,6 +87,7 @@ export const vehiclePlateSchema = z.object({
     .max(20, "车牌号不能超过 20 个字符。"),
   vehicleType: optionalShortText,
   teamName: optionalShortText,
+  insuranceExpiresAt: optionalDateInput,
   status: statusField,
   remark: optionalLongText,
 })

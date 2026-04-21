@@ -72,6 +72,10 @@ function getRecordStatusLabel(status: RecordStatus) {
   return status === RecordStatus.ENABLED ? "启用" : "禁用"
 }
 
+function formatDateLabel(value?: Date | null) {
+  return value ? value.toLocaleDateString("zh-CN") : undefined
+}
+
 function revalidateMasterDataPath(pathname: string) {
   revalidatePath(pathname)
   revalidatePath("/dashboard")
@@ -124,6 +128,7 @@ async function getVehicleForLog(id: string) {
       plateNumber: true,
       vehicleType: true,
       teamName: true,
+      insuranceExpiresAt: true,
       status: true,
       remark: true,
     },
@@ -371,6 +376,7 @@ export async function saveVehiclePlate(
     plateNumber: normalizePlateNumber(getTextValue(formData, "plateNumber")),
     vehicleType: getOptionalTextValue(formData, "vehicleType"),
     teamName: getOptionalTextValue(formData, "teamName"),
+    insuranceExpiresAt: getTextValue(formData, "insuranceExpiresAt"),
     status: getTextValue(formData, "status"),
     remark: getOptionalTextValue(formData, "remark"),
   })
@@ -390,6 +396,7 @@ export async function saveVehiclePlate(
           plateNumber: true,
           vehicleType: true,
           teamName: true,
+          insuranceExpiresAt: true,
           status: true,
           remark: true,
         },
@@ -404,6 +411,11 @@ export async function saveVehiclePlate(
           { label: "车牌号", before: beforeRecord?.plateNumber, after: updatedRecord.plateNumber },
           { label: "车辆类型", before: beforeRecord?.vehicleType, after: updatedRecord.vehicleType },
           { label: "车队名称", before: beforeRecord?.teamName, after: updatedRecord.teamName },
+          {
+            label: "保险到期时间",
+            before: formatDateLabel(beforeRecord?.insuranceExpiresAt),
+            after: formatDateLabel(updatedRecord.insuranceExpiresAt),
+          },
           { label: "状态", before: beforeRecord ? getRecordStatusLabel(beforeRecord.status) : undefined, after: getRecordStatusLabel(updatedRecord.status) },
           { label: "备注", before: beforeRecord?.remark, after: updatedRecord.remark },
         ]),
@@ -419,6 +431,7 @@ export async function saveVehiclePlate(
           plateNumber: true,
           vehicleType: true,
           teamName: true,
+          insuranceExpiresAt: true,
           status: true,
           remark: true,
         },
@@ -433,6 +446,7 @@ export async function saveVehiclePlate(
           { label: "车牌号", value: createdRecord.plateNumber },
           { label: "车辆类型", value: createdRecord.vehicleType },
           { label: "车队名称", value: createdRecord.teamName },
+          { label: "保险到期时间", value: formatDateLabel(createdRecord.insuranceExpiresAt) },
           { label: "状态", value: getRecordStatusLabel(createdRecord.status) },
           { label: "备注", value: createdRecord.remark },
         ]),
@@ -752,6 +766,7 @@ export async function toggleVehiclePlateStatus(id: string, nextStatus: RecordSta
       plateNumber: true,
       vehicleType: true,
       teamName: true,
+      insuranceExpiresAt: true,
       status: true,
       remark: true,
     },
@@ -951,6 +966,7 @@ export async function deleteVehiclePlate(id: string) {
         { label: "车牌号", value: targetRecord.plateNumber },
         { label: "车辆类型", value: targetRecord.vehicleType },
         { label: "车队名称", value: targetRecord.teamName },
+        { label: "保险到期时间", value: formatDateLabel(targetRecord.insuranceExpiresAt) },
         { label: "状态", value: getRecordStatusLabel(targetRecord.status) },
         { label: "备注", value: targetRecord.remark },
       ]),

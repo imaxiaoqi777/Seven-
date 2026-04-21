@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { AlarmClock } from "lucide-react"
 
 import { formatDurationMs, getNextBackupTarget, isBackupReminderDay } from "@/lib/backup/schedule"
@@ -14,29 +14,49 @@ function formatTargetDate(d: Date) {
   })
 }
 
+function subscribeToNow(onStoreChange: () => void) {
+  if (typeof window === "undefined") {
+    return () => {}
+  }
+
+  const timeoutId = window.setTimeout(onStoreChange, 0)
+  const intervalId = window.setInterval(onStoreChange, 1000)
+
+  return () => {
+    window.clearTimeout(timeoutId)
+    window.clearInterval(intervalId)
+  }
+}
+
+function getNowSnapshot() {
+  return Date.now()
+}
+
+function getServerNowSnapshot() {
+  return 0
+}
+
+function getInitialDismissedKey() {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  try {
+    return sessionStorage.getItem("db-backup-reminder-dismissed")
+  } catch {
+    return null
+  }
+}
+
 type DatabaseBackupScheduleProps = {
   /** 可进入「操作日志」并导出备份的管理员账号 */
   canManageBackup: boolean
 }
 
 export function DatabaseBackupSchedule({ canManageBackup }: DatabaseBackupScheduleProps) {
-  const [mounted, setMounted] = useState(false)
-  const [now, setNow] = useState(0)
-  const [dismissedKey, setDismissedKey] = useState<string | null>(null)
-
-  useEffect(() => {
-    try {
-      setDismissedKey(sessionStorage.getItem("db-backup-reminder-dismissed"))
-    } catch {
-      setDismissedKey(null)
-    }
-
-    setNow(Date.now())
-    setMounted(true)
-
-    const id = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
+  const now = useSyncExternalStore(subscribeToNow, getNowSnapshot, getServerNowSnapshot)
+  const mounted = now > 0
+  const [dismissedKey, setDismissedKey] = useState<string | null>(getInitialDismissedKey)
 
   const current = mounted ? new Date(now) : null
   const nextTarget = current ? getNextBackupTarget(current) : null

@@ -128,8 +128,8 @@ export function LoadDetailDialog({ detail }: LoadDetailDialogProps) {
                     {detail.companySocialCreditCode ? (
                       <DetailRow label="信用代码" value={detail.companySocialCreditCode} />
                     ) : null}
-                    <DetailRow label="提单号" value={detail.blNumber} />
-                    <DetailRow label="船名航次" value={detail.vesselVoyage || "未填写"} />
+                    <DetailRow label="卸货箱号" value={detail.blNumber} />
+                    <DetailRow label="装货地址" value={detail.vesselVoyage || "未填写"} />
                   </dl>
                 </section>
 
@@ -137,7 +137,7 @@ export function LoadDetailDialog({ detail }: LoadDetailDialogProps) {
                   <h4 className="text-sm font-semibold text-gray-800">箱务与地点</h4>
                   <dl className="mt-3 space-y-3">
                     <DetailRow label="箱型" value={detail.containerTypeName} />
-                    <DetailRow label="箱号" value={detail.containerNumber} />
+                    <DetailRow label="装货箱号" value={detail.containerNumber} />
                     <DetailRow label="封号" value={detail.sealNumber || "未填写"} />
                     <DetailRow label="落箱地点" value={detail.dropLocationName} />
                     <DetailRow label="地址" value={detail.dropLocationAddress} />

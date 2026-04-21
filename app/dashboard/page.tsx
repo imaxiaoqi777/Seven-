@@ -1,4 +1,4 @@
-import { CalendarRange, FileText, Package, Truck, WalletCards } from "lucide-react"
+import { CalendarRange, FileText, Package, ShieldAlert, Truck, WalletCards } from "lucide-react"
 
 import { DatabaseBackupSchedule } from "@/components/dashboard/DatabaseBackupSchedule"
 import { EmptyState } from "@/components/master-data/EmptyState"
@@ -18,7 +18,7 @@ const metricDefinitions = [
   {
     key: "activeVehicleCount",
     label: "在用车辆",
-    note: "当前执行中的运单所占用车辆数",
+    note: "当前启用状态的车辆数",
     icon: Truck,
     accent: "bg-amber-100 text-amber-600",
     formatter: (value: number) => value.toLocaleString("zh-CN"),
@@ -49,10 +49,31 @@ const feeCards = [
   { key: "balanceFee", label: "结余", note: "运费减去各项支出后的余额" },
 ] as const
 
+function formatDateLabel(value?: Date | null) {
+  return value ? value.toLocaleDateString("zh-CN") : "-"
+}
+
+function formatInsuranceReminderText(daysLeft: number | null) {
+  if (daysLeft === null) {
+    return "未填写"
+  }
+
+  if (daysLeft < 0) {
+    return `已过期 ${Math.abs(daysLeft)} 天`
+  }
+
+  if (daysLeft === 0) {
+    return "今天到期"
+  }
+
+  return `还有 ${daysLeft} 天`
+}
+
 export default async function DashboardPage() {
   const currentUser = await requireModuleAccess("dashboard")
   const overview = await getDashboardOverview(currentUser.id, currentUser.role)
   const isDriverUser = currentUser.role === "DRIVER"
+  const insuranceReminderCount = overview.insuranceExpiryReminders.length
 
   return (
     <div className="min-w-0 space-y-8">
@@ -71,14 +92,44 @@ export default async function DashboardPage() {
         {metricDefinitions.map((metric) => {
           const Icon = metric.icon
           const value = overview[metric.key]
+          const isActiveVehicleMetric = metric.key === "activeVehicleCount"
 
           return (
             <div key={metric.key} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{metric.label}</p>
                   <p className="mt-2 text-3xl font-bold text-gray-900">{metric.formatter(value)}</p>
                   <p className="mt-2 text-xs text-gray-500">{metric.note}</p>
+                  {isActiveVehicleMetric ? (
+                    <div
+                      className={`mt-3 rounded-xl px-3 py-2 text-xs ${
+                        insuranceReminderCount > 0
+                          ? "bg-amber-50 text-amber-800 ring-1 ring-amber-100"
+                          : "bg-gray-50 text-gray-500 ring-1 ring-gray-100"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <ShieldAlert className="h-3.5 w-3.5" />
+                        <span>
+                          保险到期提醒：{insuranceReminderCount > 0 ? `${insuranceReminderCount} 辆` : "暂无"}
+                        </span>
+                      </div>
+                      {insuranceReminderCount > 0 ? (
+                        <div className="mt-1.5 space-y-1">
+                          {overview.insuranceExpiryReminders.slice(0, 2).map((vehicle) => (
+                            <p key={vehicle.id} className="truncate">
+                              {vehicle.plateNumber} · {formatDateLabel(vehicle.insuranceExpiresAt)} ·{" "}
+                              {formatInsuranceReminderText(vehicle.daysLeft)}
+                            </p>
+                          ))}
+                          {insuranceReminderCount > 2 ? (
+                            <p>另有 {insuranceReminderCount - 2} 辆需要关注</p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
                 <div className={`rounded-2xl p-3 ${metric.accent}`}>
                   <Icon className="h-6 w-6" />

@@ -8,7 +8,7 @@ export default async function NewVehiclePage() {
   return (
     <PageShell
       title="新增车牌"
-      description="维护可调度的车牌、车辆类型和所属车队信息。"
+      description="维护可调度的车牌、车辆类型、所属车队和保险到期时间。"
     >
       <VehiclePlateForm backHref="/dashboard/vehicles" />
     </PageShell>

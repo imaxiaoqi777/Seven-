@@ -17,6 +17,7 @@ type VehiclePlateFormProps = {
     plateNumber?: string
     vehicleType?: string | null
     teamName?: string | null
+    insuranceExpiresAt?: string | null
     status?: "ENABLED" | "DISABLED"
     remark?: string | null
   }
@@ -73,6 +74,17 @@ export function VehiclePlateForm({
               className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
             <FieldError error={state.errors?.teamName?.[0]} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">保险到期时间</label>
+            <input
+              type="date"
+              name="insuranceExpiresAt"
+              defaultValue={initialData?.insuranceExpiresAt ?? ""}
+              className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+            <FieldError error={state.errors?.insuranceExpiresAt?.[0]} />
           </div>
 
           <div>

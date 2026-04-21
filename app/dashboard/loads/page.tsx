@@ -19,7 +19,6 @@ import {
 } from "@/lib/loads/queries"
 import type { LoadPageSearchParams } from "@/lib/loads/types"
 import {
-  buildLoadExportPath,
   buildLoadListPath,
   formatLoadAmount,
   formatLoadDateTimeLabel,
@@ -62,7 +61,7 @@ export default async function LoadsPage({
       description={
         isDriverUser
           ? "这里仅展示你自己有权限查看的运单，可按公司、箱型、司机、车牌号和提箱日期范围筛选。"
-          : "支持按公司、箱型、司机、车牌号、提单号、运单号和提箱日期范围组合筛选，并可导出当前结果。"
+          : "支持按公司、箱型、司机、车牌号、卸货箱号、运单号和提箱日期范围组合筛选，并可导出当前结果。"
       }
       action={
         <Link
@@ -89,11 +88,10 @@ export default async function LoadsPage({
             containerTypeOptions={containerTypeOptions}
             driverOptions={driverOptions}
             vehicleOptions={vehicleOptions}
-            exportHref={buildLoadExportPath(filters)}
           />
           <div className="mt-4 flex flex-col gap-2 text-sm text-gray-500 lg:flex-row lg:items-center lg:justify-between">
             <p>共 {total} 条运单</p>
-            <p>翻页、改状态、删除和导出都会保留当前筛选条件。</p>
+            <p>翻页、改状态和删除会保留当前筛选；导出弹窗会默认带入当前筛选条件。</p>
           </div>
         </div>
 
@@ -136,14 +134,14 @@ export default async function LoadsPage({
                           </div>
                         ) : null}
                         <div className="mt-1 text-xs text-gray-500">目的地：{item.destination}</div>
-                        <div className="mt-1 text-xs text-gray-500">提单号：{item.blNumber}</div>
+                        <div className="mt-1 text-xs text-gray-500">卸货箱号：{item.blNumber}</div>
                         <div className="mt-1 text-xs text-gray-500">
-                          船名航次：{item.vesselVoyage || "未填写"}
+                          装货地址：{item.vesselVoyage || "未填写"}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div>{item.containerType.name}</div>
-                        <div className="mt-1 text-xs text-gray-500">箱号：{item.containerNumber}</div>
+                        <div className="mt-1 text-xs text-gray-500">装货箱号：{item.containerNumber}</div>
                         <div className="mt-1 text-xs text-gray-500">
                           封号：{item.sealNumber || "未填写"}
                         </div>
